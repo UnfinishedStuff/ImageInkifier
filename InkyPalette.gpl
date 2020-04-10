@@ -1,0 +1,7 @@
+GIMP Palette
+Name: InkyPalette.gpl
+Columns: 3
+#
+255 255 255	White
+  0   0   0	Black
+255   0   0	Red
