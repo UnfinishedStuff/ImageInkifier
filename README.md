@@ -1,0 +1,5 @@
+This is a collection of code for converting and displaying images on Pimoroni's [InkyWHAT](https://shop.pimoroni.com/products/inky-what?variant=13590497624147) eInk HAT for the Raspberry Pi.
+
+EInk displays use tinky particles of pigment which are pulled to the front of the screen by electrical charges.  This means that unlike most screen technologies, eInk screens don't emit light themselves: ambient light reflects off the pigment particles, giving it an appearance not not entirely different to pigment particles on paper.
+
+ImageInkifier.py is a python script which takes an image file as an argument.  It uses the Pillow module to open the image, and can also alter the brightness, sharpness and contrast of the image.  It then passes the image to to GIMP ([the GNU Image Manipulation Program](https://www.gimp.org/)) which converts full-colour images into a 3-colour format compatible with Pimoroni's red InkyWHAT screen.  Sooner or later I'll twkea it for compatability with the other Inky products.
