@@ -1,83 +1,126 @@
-# Needed for displaying images on the inkyWHAT
-from inky import InkyWHAT
 # Needed for all the image processing
 from PIL import Image, ImageEnhance
-# Needed for command line arguments
+# Needed for command line arguments (abortive exits and GIMP commands)
 import os, sys
-# Needed for parsing arguments from the command line
-import argparse
 
-def inkify(image, brightness=1.0, sharpness=1.0, contrast=1.0):
-    # Try to open the image to be processed, if it fails quit the program
-    try:
-        img = Image.open(image)
-    except:
-        print("Couldn't open the image, are you sure the file path is correct\
-    and it's an image file?")
-        sys.exit()
 
-    # If the image isn't JPEG format then convert it to RGB
-    # (the palette test fails otherwise)
-    if img.format != "JPEG":
-        img = img.convert("RGB")
+class inkifier:
 
-    # If a brightness value was given then brighten the image
-    if brightness != 1.0:
-        print("Brightening!")
-        if (brightness > 0) and (brightness < 2):
-            brightener = ImageEnhance.Brightness(img)
-            img = brightener.enhance(brightness)
+    # The constructor for the class
+    def __init__(self, model, colour, setupDisplay=True):
+        # Check which model of Inky board is being used
+        if model == "InkyWHAT":
+            from inky import InkyWHAT
+            self.model = "InkyWHAT"
+        elif model == "InkyPHAT":
+            from inky import InkyPHAT
+            self.model = "InkyPHAT"
         else:
-            print("Error, brightness must be between 0 and 2.")
+            sys.exit("ERROR, model must be InkyPHAT or InkyWHAT, value given\
+ was " + str(model))
 
-    # If a sharpness value was given then sharpen the image
-    if sharpness != 1.0:
-        print("Sharpening!")
-        if (sharpness > 0) and (sharpness < 2):
-            sharpener = ImageEnhance.Sharpness(img)
-            img = sharpener.enhance(sharpness)
+        # Check which colour of Inky board is being used
+        if colour == "red":
+            self.colour = "red"
+        elif colour == "yellow":
+            self.colour = "yellow"
+        elif colour == "black":
+            self.colour = "black"
         else:
-            print("Error, sharpness value must be between 0 and 2.")
+            sys.exit("ERROR, colour must be red, yellow or black, value given\
+ was " + str(colour))
 
-    # If a contrast value was given then adjust the contrast
-    if contrast != 1.0:
-        print("Contrasting!")
-        if (contrast > 0) and (contrast < 2):
-            contraster = ImageEnhance.Contrast(img)
-            img = contraster.enhance(contrast)
-        else:
-            print("Error, contrast value must be between 0 and 2.")
-
-    # If the image isn't 300x400 pixels then resize it
-    width, height = img.size
-    if (img.width != 400) or (img.height != 300):
-        img = img.resize((400, 300))
+        # By default creating an instance of the class will also instantiate
+        # the InkyPHAT/WHAT.  If for some reason you don't want this, you
+        # can pass setupDisplay=False when instantiating the class.
+        if setupDisplay == True:
+            # Instantiate the PHAT/WHAT
+            if self.model == "InkyWHAT":
+                self.inkyDisplay = InkyWHAT(self.colour)
+            elif self.model == "InkyPHAT":
+                self.inkyDisplay = InkyPHAT(self.colour)
 
 
-    # Save the image so that it can be passed to GIMP for processing
-    img.save("/tmp/inkyTempImage.jpg")
+    # A function to open an image from a file, process it and display it
+    def show_image(self, imageFile, brightness=1, contrast=1, sharpness=1):
 
-    # Convert to an inkyWHAT-compatible format with GIMP and save as convertedImage
-    print("Converting")
-    os.system("gimp-console -b \'(script-fu-inkify \"/tmp/inkyTempImage.jpg\" \"/tmp/convertedImage.png\")\' -b \'(gimp-quit 0)\'")
-    print("Done converting!  Displaying!")
+        # Try to open the image to be processed
+        try:
+            self.img = Image.open(imageFile)
+        # If the image can't be opened inform the user and exit the function
+        except:
+            print("Couldn't open the image, are you sure the file path is correct\
+and it's an image file?")
+            return
 
-    # Open the converted image as a PIL image object
-    img = Image.open("/tmp/convertedImage.png")
-    # Remove the pre-conversion image file
-    os.remove("/tmp/inkyTempImage.jpg")
+        # Process the image for palette, brightness, contrast and sharpness
+        processedImage = self.process_image(self.img, brightness, contrast, sharpness)
+
+        # Set the processed image as the inkyWHAT image
+        self.inkyDisplay.set_image(processedImage)
+
+        # Show the image on the inkyWHAT
+        self.inkyDisplay.show()
 
 
-    # Prep InkyWHAT and show the image
-    inky_display = InkyWHAT("red")
-    inky_display.set_border(inky_display.WHITE)
-    # Set the converted image as the inkyWHAT image
-    inky_display.set_image(img)
+    # Convert an image to the inky palette, do brightness etc. if asked
+    def process_image(self, imageObject, brightness, contrast, sharpness):
 
-    # Remove the converted image file
-    os.remove("/tmp/convertedImage.png")
+        processingImg = imageObject
 
-    # Show the image on the inkyWHAT
-    inky_display.show()
+        # If the image isn't JPEG format then convert it to RGB
+        # (the palette conversion may fail otherwise)
+        if processingImg.format != "JPEG":
+            processingImg = processingImg.convert("RGB")
 
-    print("Done!")
+        # If a brightness value was given then brighten the image
+        if brightness != 1:
+            print("Brightening!")
+            if (brightness > 0) and (brightness < 2):
+                brightener = ImageEnhance.Brightness(processingImg)
+                processingImg = brightener.enhance(brightness)
+            else:
+                print("Error, brightness must be between 0 and 2.")
+
+        # If a sharpness value was given then sharpen the image 
+        if sharpness != 1:
+            print("Sharpening!")
+            if (sharpness > 0) and (sharpness < 2):
+                sharpener = ImageEnhance.Sharpness(processingImg)
+                processingImg = sharpener.enhance(sharpness)
+            else:
+                print("Error, sharpness value must be between 0 and 2.")
+
+        # If a contrast value was given then adjust the contrast
+        if contrast != 1:
+            print("Contrasting!")
+            if (contrast > 0) and (contrast < 2):
+                contraster = ImageEnhance.Contrast(processingImg)
+                processingImg = contraster.enhance(contrast)
+            else:
+                print("Error, contrast value must be between 0 and 2.")
+
+        # If the image isn't 300x400 pixels then resize it
+        width, height = processingImg.size
+        if (width != self.inkyDisplay.WIDTH) or (height != self.inkyDisplay.HEIGHT):
+            processingImg = processingImg.resize((self.inkyDisplay.WIDTH, self.inkyDisplay.HEIGHT))
+
+        # Save the image so that it can be passed to GIMP for processing
+        processingImg.save("/tmp/imageInkifierTempImage.jpg")
+
+        # Convert to an inkyWHAT-compatible format with GIMP and save as convertedImage
+        print("Converting")
+        os.system("gimp-console -b \'(script-fu-inkify \"/tmp/imageInkifierTempImage.jpg\" \"/tmp/imageInkifierConvertedImage.png\" )\' -b \'(gimp-quit 0)\'")
+        print("Done converting!  Displaying!")
+
+        # Open the converted image as a PIL image object
+        processingImg = Image.open("/tmp/imageInkifierConvertedImage.png")
+
+        # Remove the pre-conversion image file
+        os.remove("/tmp/imageInkifierTempImage.jpg")
+
+        # Remove the converted image file
+        os.remove("/tmp/imageInkifierConvertedImage.png")
+
+        # Return the converted image file
+        return(processingImg)
