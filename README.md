@@ -1,3 +1,10 @@
+# Image inkifier
+
+Automatically convert images for Pimoroni's InkyWHAT and InkyPHAT boards!
+
+![Floki the Dog](/FlokiGithub.jpg) 
+
+
 This is a collection of code for converting and displaying images on Pimoroni's [InkyWHAT](https://shop.pimoroni.com/products/inky-what?variant=13590497624147) or [InkyPHAT](https://shop.pimoroni.com/products/inky-phat?variant=12549254938707) eInk add-on boards for the Raspberry Pi.
 
 EInk displays use tiny particles of pigment which are pulled to the front of the screen by electrical charges.  This means that unlike most screen technologies, eInk screens don't emit light themselves: ambient light reflects off the pigment particles, giving it an appearance not entirely unlike pigment particles on paper.  
@@ -31,4 +38,17 @@ For example, to show `image.jpg` on a red InkyWHAT with a slight increase in con
 
 How well this works depends heavily on which Inky board you have and on how well the images convert down to just two or three pixel colours.  Simple images often work best, although the red (and presumably yellow) boards can work well if that is the only colour in the image.  Try it and see, I've found that sometimes slight increases in brightness and contrast really imrpove the results.
 
-For a pretty exemplary idea of what this script produces, if you have a red InkyWHAT try [Charlie Marshall's "Veiled in Red"](https://commons.wikimedia.org/wiki/File:Veiled_in_Red.jpg), it works incredibly well.
+If you have a red InkyWHAT try [Charlie Marshall's "Veiled in Red"](https://commons.wikimedia.org/wiki/File:Veiled_in_Red.jpg), it works incredibly well.
+
+![Veiled In Red](VeiledInRedGithub.jpg)
+
+
+# Things to note, things to do
+
+* I should probably look into whether or not this really needs a class of its own.  Something which I discovered about how Inky and GIMP work changed how I thought I'd have to write this program, so it may not longer be required.
+* All of this was tested on a red InkyWHAT and InkyPHAT in both red and black modes.  It *should* work with the yellow versions of the boards but I don't have one to try.  If you have one let me know how it goes!
+* Some sort of image rotation function would be very helpful.
+
+# Acknowledgements
+
+Huge thanks to Glenn Horan ([@Batglenn13](https://twitter.com/batglenn13)) whose photos of his dog Floki largely inspired this project.  You can see him in the image at the top of this Readme file (the dog, not Glenn!).
